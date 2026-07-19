@@ -15,9 +15,14 @@
     label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
     input{width:100%;background:#12141b;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:13px;font:700 22px/1 monospace;letter-spacing:6px;text-align:center;text-transform:uppercase;}
     input:focus{outline:1px solid var(--accent);}
-    button{cursor:pointer;border:none;border-radius:11px;font:inherit;font-weight:700;color:#fff;width:100%;padding:15px;font-size:16px;background:var(--red);margin-top:14px;}
+    button{cursor:pointer;border:none;border-radius:11px;font:inherit;font-weight:700;color:#fff;width:100%;padding:15px;font-size:16px;background:var(--red);margin-top:12px;}
+    button.ghost{background:#12141b;border:1px solid var(--border);color:var(--text);}
     button:hover{filter:brightness(1.1);}
     button:disabled{opacity:.45;}
+    .or{text-align:center;color:var(--muted);font-size:12px;margin:12px 0 2px;}
+    .scan-wrap{display:none;margin-top:12px;border-radius:12px;overflow:hidden;position:relative;background:#000;}
+    .scan-wrap video{width:100%;display:block;}
+    .scan-frame{position:absolute;inset:14%;border:3px solid rgba(255,255,255,.85);border-radius:14px;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);}
     .status{font-size:14px;margin-top:14px;padding:11px 13px;border-radius:10px;background:#12141b;border:1px solid var(--border);}
     .status.ok{border-color:var(--green);color:var(--green);}
     .status.err{border-color:var(--red);color:#f87171;}
@@ -28,10 +33,17 @@
 </head>
 <body>
   <h1><span class="dot"></span> Phone Mic</h1>
-  <p class="muted">কম্পিউটারের recorder-এ দেখানো কোডটা নিচে দিন (QR স্ক্যান করলে এমনিতেই বসে যাবে)।</p>
+  <p class="muted">recorder-এর QR স্ক্যান করুন, অথবা কোডটা টাইপ করুন — যেটা সহজ।</p>
 
   <div class="card">
-    <label>কানেকশন কোড</label>
+    <button id="scan" class="ghost">📷 QR স্ক্যান করুন</button>
+    <div class="scan-wrap" id="scanWrap">
+      <video id="video" playsinline muted></video>
+      <div class="scan-frame"></div>
+    </div>
+
+    <div class="or">— অথবা কোড টাইপ করুন —</div>
+    <label style="margin-top:8px">কানেকশন কোড</label>
     <input id="code" maxlength="6" placeholder="——————" autocomplete="off" autocapitalize="characters" inputmode="text">
     <button id="go">🎙 মাইক চালু ও কানেক্ট</button>
     <div class="meter" id="meterWrap" style="display:none"><div id="bar"></div></div>
@@ -41,16 +53,81 @@
   <p class="hint">কানেক্ট হওয়ার পর এই ট্যাব খোলা রাখুন আর ফোন lock হতে দেবেন না — নাহলে মাইক বন্ধ হয়ে যাবে।</p>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     const setStatus = (m, c) => { const s = $('status'); s.textContent = m; s.className = 'status' + (c ? ' ' + c : ''); };
 
-    // Prefill code from the QR link (?id=ABC123)
+    // Prefill code from a QR link opened directly (?id=ABC123)
     const urlId = new URLSearchParams(location.search).get('id');
     if (urlId) $('code').value = urlId.toUpperCase();
 
     let peer = null, localStream = null;
 
+    /* ---------- extract a 6-char code from scanned text (URL or raw) ---------- */
+    function parseCode(text) {
+      try {
+        const u = new URL(text);
+        const id = u.searchParams.get('id');
+        if (id) return id.toUpperCase();
+      } catch (e) { /* not a URL */ }
+      const m = String(text).trim().toUpperCase().match(/[A-Z0-9]{6}/);
+      return m ? m[0] : null;
+    }
+
+    /* ---------- in-page QR scanner ---------- */
+    let scanStream = null, scanRAF = 0;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    async function startScan() {
+      try {
+        setStatus('ক্যামেরা চালু হচ্ছে… recorder-এর QR ফোকাস করুন');
+        scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+        const video = $('video');
+        video.srcObject = scanStream;
+        await video.play();
+        $('scanWrap').style.display = 'block';
+        $('scan').textContent = '✕ স্ক্যান বন্ধ করুন';
+        scanRAF = requestAnimationFrame(scanTick);
+      } catch (e) {
+        setStatus('ক্যামেরা পাওয়া যায়নি: ' + e.message, 'err');
+      }
+    }
+
+    function scanTick() {
+      const video = $('video');
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const result = window.jsQR ? jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' }) : null;
+        if (result) {
+          const code = parseCode(result.data);
+          if (code) {
+            stopScan();
+            $('code').value = code;
+            setStatus('QR পাওয়া গেছে ✔ কানেক্ট হচ্ছে…', 'ok');
+            connect();
+            return;
+          }
+        }
+      }
+      scanRAF = requestAnimationFrame(scanTick);
+    }
+
+    function stopScan() {
+      if (scanRAF) cancelAnimationFrame(scanRAF);
+      scanRAF = 0;
+      if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+      $('scanWrap').style.display = 'none';
+      $('scan').textContent = '📷 QR স্ক্যান করুন';
+    }
+
+    $('scan').onclick = () => { scanStream ? stopScan() : startScan(); };
+
+    /* ---------- audio level meter ---------- */
     function startMeter(stream) {
       const ac = new (window.AudioContext || window.webkitAudioContext)();
       const src = ac.createMediaStreamSource(stream);
@@ -68,18 +145,21 @@
       tick();
     }
 
-    $('go').onclick = async () => {
+    /* ---------- connect mic to the recorder over the PeerJS relay ---------- */
+    async function connect() {
       const code = $('code').value.trim().toUpperCase();
       if (code.length < 6) { setStatus('৬ অক্ষরের কোডটা দিন', 'err'); return; }
       $('go').disabled = true;
       try {
-        setStatus('মাইকের অনুমতি চাওয়া হচ্ছে…');
-        localStream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
-        });
-        startMeter(localStream);
-
+        if (!localStream) {
+          setStatus('মাইকের অনুমতি চাওয়া হচ্ছে…');
+          localStream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+          });
+          startMeter(localStream);
+        }
         setStatus('recorder-এর সাথে কানেক্ট হচ্ছে…');
+        if (peer) { try { peer.destroy(); } catch (e) {} }
         peer = new Peer({ debug: 0 });   // random id; we only need to *call* the recorder
         peer.on('open', () => {
           const call = peer.call('psr-' + code, localStream);
@@ -99,7 +179,9 @@
         setStatus('মাইক পাওয়া যায়নি: ' + e.message + ' (পেজটা HTTPS দিয়ে খুলুন)', 'err');
         $('go').disabled = false;
       }
-    };
+    }
+
+    $('go').onclick = connect;
   </script>
 </body>
 </html>
