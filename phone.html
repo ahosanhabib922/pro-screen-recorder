@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Phone Mic — Pro Screen Recorder</title>
+  <style>
+    :root{--bg:#0f1117;--panel:#1c1f29;--border:#2b2f3d;--text:#e7e9f0;--muted:#8b91a5;--red:#ef4444;--green:#22c55e;--accent:#6366f1;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:18px;max-width:520px;margin:0 auto;-webkit-text-size-adjust:100%;}
+    h1{font-size:19px;display:flex;gap:8px;align-items:center;margin-bottom:4px;}
+    .dot{width:11px;height:11px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);}
+    p.muted{color:var(--muted);font-size:13px;margin-bottom:14px;}
+    .step{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;}
+    .step h2{font-size:14px;margin-bottom:10px;display:flex;gap:8px;align-items:center;}
+    .num{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none;}
+    button{cursor:pointer;border:none;border-radius:10px;font:inherit;font-weight:600;color:var(--text);width:100%;padding:14px;font-size:15px;}
+    .primary{background:var(--red);color:#fff;}
+    .primary:hover{filter:brightness(1.1);}
+    .ghost{background:#12141b;border:1px solid var(--border);}
+    button:disabled{opacity:.4;cursor:not-allowed;}
+    textarea{width:100%;background:#12141b;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px;font:12px/1.4 monospace;resize:vertical;min-height:76px;margin-top:8px;word-break:break-all;}
+    textarea:focus{outline:1px solid var(--accent);}
+    .row{display:flex;gap:8px;margin-top:8px;}
+    .row button{width:auto;flex:1;padding:11px;font-size:13px;}
+    .hidden{display:none!important;}
+    .status{font-size:13px;margin-top:10px;padding:9px 12px;border-radius:9px;background:#12141b;border:1px solid var(--border);}
+    .status.ok{border-color:var(--green);color:var(--green);}
+    .status.err{border-color:var(--red);color:#f87171;}
+    .meter{height:10px;background:#12141b;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:10px;}
+    .meter>div{height:100%;width:0;background:linear-gradient(90deg,var(--green),#eab308,var(--red));transition:width .05s;}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;}
+  </style>
+</head>
+<body>
+  <h1><span class="dot"></span> Phone Mic</h1>
+  <p class="muted">এই ফোনের মাইক কম্পিউটারের screen recorder-এ পাঠান। কোনো অ্যাপ install লাগবে না।</p>
+
+  <div class="step">
+    <h2><span class="num">1</span> মাইক চালু করে কোড বানান</h2>
+    <button id="startBtn" class="primary">🎙 মাইক চালু করুন</button>
+    <div class="meter hidden" id="meterWrap"><div id="meterBar"></div></div>
+    <textarea id="offerBox" class="hidden" readonly placeholder="কোড এখানে আসবে…"></textarea>
+    <div class="row hidden" id="copyRow">
+      <button class="ghost" id="copyOfferBtn">📋 কোড কপি করুন</button>
+    </div>
+    <p class="hint">এই কোডটা কপি করে কম্পিউটারের recorder-এর "Phone offer" বক্সে পেস্ট করুন।</p>
+  </div>
+
+  <div class="step hidden" id="step2">
+    <h2><span class="num">2</span> কম্পিউটারের answer কোড পেস্ট করুন</h2>
+    <textarea id="answerBox" placeholder="Recorder থেকে পাওয়া answer কোড এখানে পেস্ট করুন…"></textarea>
+    <button class="primary" id="connectBtn" style="margin-top:8px">🔗 কানেক্ট করুন</button>
+  </div>
+
+  <div class="status" id="status">প্রস্তুত।</div>
+  <p class="hint">টিপস: কানেক্ট হওয়ার পর এই পেজ/ট্যাব খোলা রাখুন আর ফোন lock হতে দেবেন না — নাহলে মাইক বন্ধ হয়ে যাবে।</p>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const encode = (obj) => btoa(JSON.stringify(obj));
+    const decode = (str) => JSON.parse(atob(str.trim()));
+    const setStatus = (msg, cls) => { const s = $('status'); s.textContent = msg; s.className = 'status' + (cls ? ' ' + cls : ''); };
+
+    let pc = null, localStream = null;
+
+    function waitIceComplete(peer) {
+      return new Promise((resolve) => {
+        if (peer.iceGatheringState === 'complete') return resolve();
+        const done = () => { peer.removeEventListener('icegatheringstatechange', check); resolve(); };
+        const check = () => { if (peer.iceGatheringState === 'complete') done(); };
+        peer.addEventListener('icegatheringstatechange', check);
+        setTimeout(done, 3000); // same-Wi-Fi safety: don't wait forever
+      });
+    }
+
+    function startMeter(stream) {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const src = ac.createMediaStreamSource(stream);
+      const an = ac.createAnalyser(); an.fftSize = 512;
+      src.connect(an);
+      const buf = new Uint8Array(an.frequencyBinCount);
+      $('meterWrap').classList.remove('hidden');
+      const tick = () => {
+        an.getByteTimeDomainData(buf);
+        let peak = 0;
+        for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i] - 128));
+        $('meterBar').style.width = Math.min(100, (peak / 128) * 140) + '%';
+        requestAnimationFrame(tick);
+      };
+      tick();
+    }
+
+    $('startBtn').onclick = async () => {
+      try {
+        setStatus('মাইকের অনুমতি চাওয়া হচ্ছে…');
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+        });
+        startMeter(localStream);
+
+        pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
+        pc.onconnectionstatechange = () => {
+          const st = pc.connectionState;
+          if (st === 'connected') setStatus('✔ কানেক্টেড — মাইক এখন recorder-এ যাচ্ছে।', 'ok');
+          else if (st === 'failed' || st === 'disconnected') setStatus('কানেকশন বিচ্ছিন্ন হয়েছে। আবার শুরু করুন।', 'err');
+        };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await waitIceComplete(pc);
+
+        $('offerBox').value = encode(pc.localDescription);
+        $('startBtn').classList.add('hidden');
+        $('offerBox').classList.remove('hidden');
+        $('copyRow').classList.remove('hidden');
+        $('step2').classList.remove('hidden');
+        setStatus('কোড তৈরি — এবার কপি করে recorder-এ পেস্ট করুন।');
+      } catch (e) {
+        setStatus('মাইক পাওয়া যায়নি: ' + e.message + ' (পেজটা HTTPS দিয়ে খুলুন)', 'err');
+      }
+    };
+
+    $('copyOfferBtn').onclick = async () => {
+      const box = $('offerBox');
+      try { await navigator.clipboard.writeText(box.value); setStatus('কোড কপি হয়েছে ✔'); }
+      catch { box.select(); document.execCommand('copy'); setStatus('কোড কপি হয়েছে ✔'); }
+    };
+
+    $('connectBtn').onclick = async () => {
+      try {
+        if (!pc) return;
+        const ans = decode($('answerBox').value);
+        await pc.setRemoteDescription(ans);
+        setStatus('কানেক্ট করা হচ্ছে…');
+      } catch (e) {
+        setStatus('Answer কোড ভুল বা নষ্ট: ' + e.message, 'err');
+      }
+    };
+  </script>
+</body>
+</html>
