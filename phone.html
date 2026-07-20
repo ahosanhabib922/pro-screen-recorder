@@ -80,10 +80,35 @@
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
+    function camErrMsg(e) {
+      const n = e && e.name;
+      if (n === 'NotAllowedError' || n === 'SecurityError')
+        return 'ক্যামেরার অনুমতি দেওয়া হয়নি — ব্রাউজারের 🔒/সেটিংসে Camera "Allow" করুন, নয়তো নিচে কোড টাইপ করুন';
+      if (n === 'NotReadableError' || n === 'TrackStartError')
+        return 'ক্যামেরা অন্য অ্যাপে চালু আছে — সেটা বন্ধ করে আবার চেষ্টা করুন, নয়তো কোড টাইপ করুন';
+      if (n === 'NotFoundError' || n === 'OverconstrainedError')
+        return 'ক্যামেরা পাওয়া যায়নি — নিচে কোডটা টাইপ করে কানেক্ট করুন';
+      return 'ক্যামেরা চালু করা গেল না (' + (n || (e && e.message)) + ') — কোড টাইপ করে দিন';
+    }
+
     async function startScan() {
+      if (!window.jsQR) { setStatus('QR স্ক্যানার লোড হয়নি — নিচে কোড টাইপ করে দিন', 'err'); return; }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus('এই ব্রাউজারে ক্যামেরা সাপোর্ট নেই — কোড টাইপ করে দিন', 'err'); return;
+      }
+      setStatus('ক্যামেরা চালু হচ্ছে… recorder-এর QR ফোকাস করুন');
+      // Try the back camera first, then fall back to any available camera.
+      const attempts = [
+        { video: { facingMode: { ideal: 'environment' } } },
+        { video: true }
+      ];
+      let lastErr = null;
+      for (const c of attempts) {
+        try { scanStream = await navigator.mediaDevices.getUserMedia(c); break; }
+        catch (e) { lastErr = e; }
+      }
+      if (!scanStream) { setStatus(camErrMsg(lastErr), 'err'); return; }
       try {
-        setStatus('ক্যামেরা চালু হচ্ছে… recorder-এর QR ফোকাস করুন');
-        scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
         const video = $('video');
         video.srcObject = scanStream;
         await video.play();
@@ -91,7 +116,8 @@
         $('scan').textContent = '✕ স্ক্যান বন্ধ করুন';
         scanRAF = requestAnimationFrame(scanTick);
       } catch (e) {
-        setStatus('ক্যামেরা পাওয়া যায়নি: ' + e.message, 'err');
+        stopScan();
+        setStatus(camErrMsg(e), 'err');
       }
     }
 
