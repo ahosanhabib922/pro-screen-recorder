@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><span class="dot"></span> Pro Screen Recorder</div>
+    <span id="stateChip" class="chip hidden"></span>
+  </header>
+
+  <!-- ============ SETUP VIEW (idle) ============ -->
+  <main id="setupView">
+    <section>
+      <h2>Video</h2>
+      <div class="row">
+        <label>Resolution</label>
+        <select id="resolution">
+          <option value="auto">Auto (native)</option>
+          <option value="2160">4K — 2160p</option>
+          <option value="1440">1440p</option>
+          <option value="1080" selected>1080p</option>
+          <option value="720">720p</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Frame rate</label>
+        <select id="fps">
+          <option value="60">60 fps</option>
+          <option value="30" selected>30 fps</option>
+          <option value="24">24 fps</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Quality</label>
+        <select id="quality">
+          <option value="ultra">Ultra (largest file)</option>
+          <option value="high" selected>High</option>
+          <option value="standard">Standard</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Format</label>
+        <select id="format">
+          <option value="auto" selected>Auto (best available)</option>
+          <option value="vp9">WebM · VP9</option>
+          <option value="vp8">WebM · VP8</option>
+          <option value="mp4">MP4 · H.264</option>
+        </select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Audio</h2>
+      <div class="row toggle-row">
+        <label for="micOn">Microphone</label>
+        <input type="checkbox" id="micOn" checked>
+      </div>
+      <div class="row" id="micDeviceRow">
+        <label>Mic device</label>
+        <select id="micDevice"><option value="">Default</option></select>
+      </div>
+      <div class="row toggle-row sub">
+        <label for="noiseSuppression">Noise suppression</label>
+        <input type="checkbox" id="noiseSuppression" checked>
+      </div>
+      <div class="row toggle-row sub">
+        <label for="echoCancellation">Echo cancellation</label>
+        <input type="checkbox" id="echoCancellation" checked>
+      </div>
+      <div class="row toggle-row sub">
+        <label for="autoGain">Auto gain control</label>
+        <input type="checkbox" id="autoGain" checked>
+      </div>
+      <div class="row sub">
+        <label>Mic volume <b id="micVolVal">100%</b></label>
+        <input type="range" id="micVolume" min="20" max="150" step="5" value="100">
+      </div>
+      <div class="row">
+        <button id="micTestBtn" class="ghost small">🎙 Test mic</button>
+        <div class="meter"><div id="micLevel"></div></div>
+      </div>
+      <p id="clipWarn" class="hint warn hidden">⚠ Mic খুব জোরে — audio ফেটে যেতে পারে। Mic volume কমান বা mic থেকে একটু দূরে যান।</p>
+      <div class="row toggle-row">
+        <label for="sysAudio">Tab / system audio</label>
+        <input type="checkbox" id="sysAudio" checked>
+      </div>
+      <div class="row sub">
+        <label>Tab audio volume <b id="sysVolVal">100%</b></label>
+        <input type="range" id="sysVolume" min="0" max="150" step="5" value="100">
+      </div>
+      <div class="row toggle-row">
+        <label for="audioProcessing" title="Rumble filter + anti-clip limiter">Studio processing (anti-clip limiter)</label>
+        <input type="checkbox" id="audioProcessing" checked>
+      </div>
+      <p class="hint">macOS-এ Chrome শুধু <b>tab</b> এর audio capture করতে পারে — picker-এ tab বেছে “Share audio” টিক দিন। Screen/window এ mic-ই record হবে।</p>
+    </section>
+
+    <section>
+      <h2>Extras</h2>
+      <div class="row">
+        <label>Countdown</label>
+        <select id="countdown">
+          <option value="0">Off</option>
+          <option value="3" selected>3 sec</option>
+          <option value="5">5 sec</option>
+          <option value="10">10 sec</option>
+        </select>
+      </div>
+      <div class="row toggle-row">
+        <label for="cameraOn">Camera bubble (webcam overlay)</label>
+        <input type="checkbox" id="cameraOn">
+      </div>
+      <div class="row" id="camDeviceRow">
+        <label>Camera</label>
+        <select id="camDevice"><option value="">Default</option></select>
+      </div>
+      <div class="row" id="camSizeRow">
+        <label>Bubble size</label>
+        <select id="camSize">
+          <option value="180">Small</option>
+          <option value="240" selected>Medium</option>
+          <option value="320">Large</option>
+        </select>
+      </div>
+      <div class="row toggle-row">
+        <label for="floatControls" title="Floating always-on-top control window">Floating controls window</label>
+        <input type="checkbox" id="floatControls" checked>
+      </div>
+      <div class="row">
+        <label>Auto-stop after</label>
+        <select id="maxMinutes">
+          <option value="0" selected>Never</option>
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="30">30 min</option>
+          <option value="60">60 min</option>
+        </select>
+      </div>
+      <div class="row toggle-row">
+        <label for="autoDownload">Auto-download when stopped</label>
+        <input type="checkbox" id="autoDownload" checked>
+      </div>
+      <div class="row">
+        <label>Filename prefix</label>
+        <input type="text" id="filePrefix" value="recording" spellcheck="false">
+      </div>
+    </section>
+
+    <button id="startBtn" class="primary">● Start Recording</button>
+    <p class="hint center">Shortcuts: ⌥⇧R start/stop · ⌥⇧P pause · ⌥⇧M mute — <a href="#" id="shortcutsLink">customize</a></p>
+  </main>
+
+  <!-- ============ CONTROLS VIEW (recording) ============ -->
+  <main id="controlsView" class="hidden">
+    <div class="timer-wrap">
+      <div id="bigTimer">00:00</div>
+      <div id="recInfo" class="hint center"></div>
+    </div>
+    <div class="ctrl-grid">
+      <button id="pauseBtn" class="ctrl">⏸ Pause</button>
+      <button id="micBtn" class="ctrl">🎙 Mute mic</button>
+      <button id="stopBtn" class="ctrl stop">⏹ Stop &amp; Save</button>
+      <button id="discardBtn" class="ctrl danger">✕ Discard</button>
+    </div>
+    <p class="hint center">Recorder tab টি বন্ধ করবেন না — recording সেখানে চলছে।</p>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #canvas {
+    width: 1280px; height: 800px;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 58px 90px 0; text-align: center;
+  }
+  h1 { font-size: 44px; font-weight: 800; letter-spacing: -.02em; }
+  h1 b { color: #22c55e; }
+  .tag { font-size: 19px; margin: 14px 0 40px; }
+
+  .flow { display: flex; align-items: center; gap: 22px; margin-bottom: 44px; }
+  .src { padding: 22px 26px; width: 250px; text-align: left; }
+  .src h3 { font-size: 17px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .slider { height: 6px; border-radius: 999px; background: #333849; position: relative; }
+  .slider i { position: absolute; left: 0; top: 0; height: 100%; border-radius: 999px; background: linear-gradient(90deg,#6366f1,#8b5cf6); display: block; }
+  .slider b { position: absolute; top: -5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; display: block; }
+  .pct { font-size: 13px; color: #8b91a5; margin-top: 9px; }
+  .arrow { font-size: 30px; color: #4b5273; }
+  .proc { padding: 22px 26px; width: 270px; text-align: left; border-color: #22c55e55; }
+  .proc h3 { font-size: 17px; color: #22c55e; margin-bottom: 12px; }
+  .proc div { font-size: 14.5px; color: #d5d9e6; padding: 5px 0; display: flex; gap: 9px; }
+  .out { padding: 22px 26px; width: 210px; }
+  .out .wave { display: flex; align-items: center; gap: 3.5px; height: 58px; justify-content: center; margin-bottom: 10px; }
+  .out .wave i { width: 5px; border-radius: 3px; background: linear-gradient(180deg,#22c55e,#16a34a); display: block; }
+  .out span { font-size: 14px; color: #8b91a5; }
+
+  .feats { display: flex; gap: 12px; }
+  .chip { font-size: 14.5px; padding: 9px 18px; }
+</style>
+</head>
+<body>
+  <div id="canvas" class="canvas">
+    <h1>Crystal-clear audio — <b>no noise, no clipping</b></h1>
+    <div class="tag">Your voice and tab audio, mixed live through a real processing chain</div>
+
+    <div class="flow">
+      <div class="src card">
+        <h3>🎙 Microphone</h3>
+        <div class="slider"><i style="width:72%"></i><b style="left:calc(72% - 8px)"></b></div>
+        <div class="pct">Volume 90% · noise suppression on</div>
+      </div>
+      <div class="arrow">➜</div>
+      <div class="proc card">
+        <h3>Studio processing</h3>
+        <div>✔ Rumble &amp; hum filter (90 Hz)</div>
+        <div>✔ Voice compressor</div>
+        <div>✔ Anti-clip limiter</div>
+        <div>✔ 48 kHz broadcast rate</div>
+      </div>
+      <div class="arrow">➜</div>
+      <div class="out card">
+        <div class="wave">
+          <i style="height:18%"></i><i style="height:38%"></i><i style="height:62%"></i><i style="height:88%"></i><i style="height:70%"></i><i style="height:95%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:40%"></i><i style="height:66%"></i><i style="height:30%"></i><i style="height:50%"></i><i style="height:22%"></i>
+        </div>
+        <span>Clean, balanced output</span>
+      </div>
+    </div>
+    <div class="flow" style="margin-top:-18px">
+      <div class="src card">
+        <h3>🔊 Tab audio</h3>
+        <div class="slider"><i style="width:58%"></i><b style="left:calc(58% - 8px)"></b></div>
+        <div class="pct">Volume 85% · mixed under your voice</div>
+      </div>
+    </div>
+
+    <div class="feats">
+      <span class="chip">🎚 Separate mic &amp; tab volume</span>
+      <span class="chip">📈 Live mic test meter</span>
+      <span class="chip">⚠️ Clip warning</span>
+      <span class="chip">🔇 One-tap mic mute</span>
+    </div>
+  </div>
+</body>
+</html>

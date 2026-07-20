@@ -1,0 +1,136 @@
+:root {
+  --bg: #14161d;
+  --panel: #1c1f29;
+  --border: #2b2f3d;
+  --text: #e7e9f0;
+  --muted: #8b91a5;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --accent: #6366f1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 340px;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg); z-index: 5;
+}
+.logo { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+.chip {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+  background: var(--red); color: #fff;
+}
+.chip.paused { background: var(--amber); color: #111; }
+
+main { padding: 12px 14px 16px; max-height: 480px; overflow-y: auto; }
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+h2 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin-bottom: 8px;
+}
+
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 4px 0;
+}
+.row label { color: var(--text); flex: 1; }
+.row.sub { padding-left: 12px; }
+.row.sub label { color: var(--muted); font-size: 12px; }
+
+select, input[type="text"] {
+  background: #12141b; color: var(--text);
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 5px 8px; font-size: 12px; max-width: 160px; width: 160px;
+}
+select:focus, input:focus { outline: 1px solid var(--accent); }
+
+input[type="checkbox"] {
+  appearance: none; width: 34px; height: 20px; border-radius: 999px;
+  background: #333849; position: relative; cursor: pointer; flex: none;
+  transition: background .15s;
+}
+input[type="checkbox"]::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  transition: left .15s;
+}
+input[type="checkbox"]:checked { background: var(--accent); }
+input[type="checkbox"]:checked::after { left: 16px; }
+
+button {
+  cursor: pointer; border: none; border-radius: 9px;
+  font: inherit; font-weight: 600; color: var(--text);
+}
+button.primary {
+  width: 100%; padding: 12px; font-size: 15px;
+  background: var(--red); color: #fff;
+  box-shadow: 0 4px 18px rgba(239, 68, 68, .35);
+}
+button.primary:hover { filter: brightness(1.1); }
+button.ghost {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+}
+button.small { padding: 4px 10px; font-size: 12px; flex: none; }
+button.ghost.active { border-color: var(--red); color: var(--red); }
+
+.meter {
+  flex: 1; height: 8px; border-radius: 999px; background: #12141b;
+  border: 1px solid var(--border); overflow: hidden;
+}
+#micLevel {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+  transition: width .06s linear;
+}
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 160px; max-width: 160px; height: 4px; border-radius: 999px;
+  background: #333849; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%; background: var(--accent);
+}
+
+.hint { color: var(--muted); font-size: 11px; margin-top: 6px; }
+.hint.warn { color: var(--amber); }
+.hint.center { text-align: center; }
+.hint a { color: var(--accent); text-decoration: none; }
+.hidden { display: none !important; }
+
+/* controls view */
+.timer-wrap { text-align: center; padding: 18px 0 10px; }
+#bigTimer {
+  font-size: 44px; font-weight: 800; letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.ctrl-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 6px;
+}
+button.ctrl {
+  padding: 12px 8px; background: var(--panel);
+  border: 1px solid var(--border); font-size: 13px;
+}
+button.ctrl:hover { border-color: var(--accent); }
+button.ctrl.stop { background: var(--red); color: #fff; border-color: var(--red); grid-column: span 1; }
+button.ctrl.danger { color: #f87171; }
+button.ctrl.on { border-color: var(--amber); color: var(--amber); }

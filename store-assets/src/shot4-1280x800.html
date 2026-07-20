@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #canvas {
+    width: 1280px; height: 800px;
+    display: flex; align-items: center; gap: 60px; padding: 0 85px;
+  }
+  .left { flex: 1; }
+  h1 { font-size: 42px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+  h1 b { color: #ef4444; }
+  .tag { font-size: 18px; margin: 16px 0 30px; }
+  ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  li { font-size: 17px; display: flex; gap: 13px; color: #d5d9e6; }
+  kbd {
+    background: #12141b; border: 1px solid #2b2f3d; border-bottom-width: 3px;
+    border-radius: 7px; padding: 3px 9px; font-size: 14px; font-family: inherit;
+  }
+
+  .right { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 34px; }
+  .pipwin { padding: 16px; width: 240px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .bubble {
+    width: 168px; height: 168px; border-radius: 50%;
+    border: 4px solid #ef4444; overflow: hidden;
+    background: radial-gradient(96px 96px at 50% 38%, #f5c9a8 0 34%, transparent 35%),
+                radial-gradient(150px 96px at 50% 105%, #4b5273 0 55%, transparent 56%),
+                linear-gradient(180deg, #2a2f42, #1a1d2b);
+  }
+  .pipbar { display: flex; align-items: center; gap: 8px; }
+  .timer { font-size: 17px; }
+  .pipbtn { background: #262a37; border-radius: 8px; padding: 7px 10px; font-size: 14px; }
+  .pipbtn.stop { background: #ef4444; }
+
+  .save-card { width: 430px; padding: 22px; }
+  .save-card h3 { font-size: 18px; margin-bottom: 14px; }
+  .metas { display: flex; gap: 9px; margin-bottom: 14px; }
+  .m { flex: 1; background: #12141b; border: 1px solid #2b2f3d; border-radius: 9px; padding: 9px 11px; }
+  .m span { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: #8b91a5; display: block; }
+  .m b { font-size: 14px; }
+  .fname { background: #12141b; border: 1px solid #2b2f3d; border-radius: 9px; padding: 10px 13px; font-size: 13.5px; color: #d5d9e6; margin-bottom: 13px; }
+  .save-btns { display: flex; gap: 9px; }
+  .btn { flex: 1; padding: 11px 0; font-size: 14px; }
+  .btn.save { background: #ef4444; border-color: #ef4444; color: #fff; }
+</style>
+</head>
+<body>
+  <div id="canvas" class="canvas">
+    <div class="left">
+      <h1>Camera bubble &amp;<br><b>floating controls</b></h1>
+      <div class="tag">An always-on-top control window follows you to any app.</div>
+      <ul>
+        <li>📷 Round webcam overlay — 3 sizes, appears in your recording</li>
+        <li>🎛 Timer, pause, mic mute &amp; stop — always within reach</li>
+        <li>⏸ Pause and resume as many times as you need</li>
+        <li>👀 Instant preview — trim-check before you save</li>
+        <li>⌨️ <kbd>⌥⇧R</kbd> start/stop &nbsp; <kbd>⌥⇧P</kbd> pause &nbsp; <kbd>⌥⇧M</kbd> mute</li>
+      </ul>
+    </div>
+    <div class="right">
+      <div class="pipwin card">
+        <div class="bubble"></div>
+        <div class="pipbar">
+          <span class="timer">04:18</span>
+          <span class="pipbtn">⏸</span>
+          <span class="pipbtn">🎙</span>
+          <span class="pipbtn stop">⏹ Stop</span>
+        </div>
+      </div>
+      <div class="save-card card">
+        <h3>Recording complete ✔</h3>
+        <div class="metas">
+          <div class="m"><span>Duration</span><b>04:18</b></div>
+          <div class="m"><span>Size</span><b>186 MB</b></div>
+          <div class="m"><span>Format</span><b>MP4</b></div>
+          <div class="m"><span>Res</span><b>2560×1600</b></div>
+        </div>
+        <div class="fname">recording-2026-07-05_14.32.08.mp4</div>
+        <div class="save-btns">
+          <span class="btn save">⬇ Save</span>
+          <span class="btn">● Record again</span>
+          <span class="btn" style="color:#f87171">🗑 Delete</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

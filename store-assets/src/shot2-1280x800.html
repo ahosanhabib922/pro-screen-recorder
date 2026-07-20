@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #canvas {
+    width: 1280px; height: 800px;
+    display: flex; align-items: center; gap: 70px; padding: 0 90px;
+  }
+  .left { flex: 1; }
+  h1 { font-size: 42px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+  h1 b { color: #6366f1; }
+  .tag { font-size: 18px; margin: 16px 0 30px; }
+  ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  li { font-size: 17px; display: flex; gap: 13px; align-items: flex-start; color: #d5d9e6; }
+  li em { font-style: normal; font-size: 19px; }
+
+  .panel { width: 460px; padding: 24px; flex: none; }
+  .sec { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: #8b91a5; margin: 16px 0 8px; font-weight: 700; }
+  .sec:first-child { margin-top: 0; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 15px; }
+  .val {
+    background: #12141b; border: 1px solid #2b2f3d; border-radius: 8px;
+    padding: 6px 14px; font-size: 13.5px; color: #d5d9e6; min-width: 150px; text-align: center;
+  }
+  .sw { width: 40px; height: 23px; border-radius: 999px; background: #6366f1; position: relative; }
+  .sw::after { content:""; position: absolute; top: 2.5px; right: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; }
+  .sw.off { background: #333849; }
+  .sw.off::after { right: auto; left: 3px; }
+  .startbtn {
+    margin-top: 20px; background: #ef4444; color: #fff; font-weight: 800;
+    border-radius: 12px; text-align: center; padding: 15px 0; font-size: 17px;
+    box-shadow: 0 6px 26px rgba(239,68,68,.4);
+  }
+</style>
+</head>
+<body>
+  <div id="canvas" class="canvas">
+    <div class="left">
+      <h1>Every setting you need,<br><b>none you don't</b></h1>
+      <div class="tag">Dial in resolution, frame rate, bitrate and format — then hit record.</div>
+      <ul>
+        <li><em>🖥</em> Auto / 4K / 1440p / 1080p / 720p at 24, 30 or 60 fps</li>
+        <li><em>📦</em> Record straight to MP4 (H.264) or WebM (VP9/VP8)</li>
+        <li><em>⚙️</em> Standard / High / Ultra quality presets — bitrate scales automatically</li>
+        <li><em>⏱</em> Countdown, auto-stop timer &amp; auto-download</li>
+        <li><em>⌨️</em> Keyboard shortcuts: start, pause, mute — without leaving your app</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <div class="sec">Video</div>
+      <div class="row"><span>Resolution</span><span class="val">4K — 2160p</span></div>
+      <div class="row"><span>Frame rate</span><span class="val">60 fps</span></div>
+      <div class="row"><span>Quality</span><span class="val">Ultra</span></div>
+      <div class="row"><span>Format</span><span class="val">MP4 · H.264</span></div>
+      <div class="sec">Audio</div>
+      <div class="row"><span>Microphone</span><span class="sw"></span></div>
+      <div class="row"><span>Tab / system audio</span><span class="sw"></span></div>
+      <div class="row"><span>Studio processing</span><span class="sw"></span></div>
+      <div class="sec">Extras</div>
+      <div class="row"><span>Countdown</span><span class="val">3 sec</span></div>
+      <div class="row"><span>Camera bubble</span><span class="sw off"></span></div>
+      <div class="startbtn">● Start Recording</div>
+    </div>
+  </div>
+</body>
+</html>

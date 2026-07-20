@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #canvas {
+    width: 1280px; height: 800px;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 56px 80px 0; text-align: center;
+  }
+  h1 { font-size: 44px; font-weight: 800; letter-spacing: -.02em; }
+  h1 b { color: #ef4444; }
+  .tag { font-size: 19px; margin: 14px 0 26px; }
+  .chips { display: flex; gap: 12px; margin-bottom: 38px; }
+  .chip { font-size: 15px; padding: 9px 20px; }
+
+  .rec-card { width: 880px; padding: 26px; text-align: left; }
+  .rec-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .timer { font-size: 40px; }
+  .meta { color: #8b91a5; font-size: 15px; display: flex; gap: 18px; align-items: center; }
+  .rec-chip { font-size: 14px; padding: 7px 16px; }
+  .screenmock { height: 330px; }
+  .content { padding: 24px; display: flex; flex-direction: column; gap: 13px; }
+  .btnrow { display: flex; gap: 12px; margin-top: 18px; }
+  .btn { flex: 1; padding: 14px 0; font-size: 15px; }
+</style>
+</head>
+<body>
+  <div id="canvas" class="canvas">
+    <h1>Record your screen in <b>stunning quality</b></h1>
+    <div class="tag">Entire screen, one window, or a single Chrome tab — you choose</div>
+    <div class="chips">
+      <span class="chip">🎥 Up to 4K</span>
+      <span class="chip">⚡ 60 fps</span>
+      <span class="chip">📦 MP4 · WebM VP9</span>
+      <span class="chip">🚀 Up to 45 Mbps bitrate</span>
+    </div>
+    <div class="rec-card card">
+      <div class="rec-top">
+        <span class="timer">07:32</span>
+        <div class="meta">
+          <span>3456×2234 · 60fps · 16Mbps</span>
+          <span>412 MB</span>
+          <span class="rec-chip"><i></i> REC</span>
+        </div>
+      </div>
+      <div class="screenmock">
+        <div class="winbar"><b style="background:#ff5f57"></b><b style="background:#febc2e"></b><b style="background:#28c840"></b></div>
+        <div class="content">
+          <div class="skel" style="width:38%;height:20px"></div>
+          <div class="skel" style="width:85%;height:12px"></div>
+          <div class="skel" style="width:78%;height:12px"></div>
+          <div class="skel" style="width:65%;height:12px"></div>
+          <div style="display:flex;gap:14px;margin-top:12px">
+            <div class="skel" style="width:180px;height:96px"></div>
+            <div class="skel" style="width:180px;height:96px"></div>
+            <div class="skel" style="width:180px;height:96px"></div>
+            <div class="skel" style="width:180px;height:96px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="btnrow">
+        <span class="btn">⏸ Pause</span>
+        <span class="btn">🎙 Mute mic</span>
+        <span class="btn stop">⏹ Stop &amp; Save</span>
+        <span class="btn" style="color:#f87171">✕ Discard</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

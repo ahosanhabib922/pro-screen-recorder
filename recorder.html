@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pro Screen Recorder</title>
+  <link rel="stylesheet" href="recorder.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo"><span class="dot"></span> Pro Screen Recorder</div>
+      <div id="statusChip" class="chip idle">Ready</div>
+    </header>
+
+    <!-- idle / ready -->
+    <section id="readyView" class="card center-card">
+      <h1>Record করতে প্রস্তুত</h1>
+      <p class="muted">নিচের বাটনে ক্লিক করলে Chrome-এর picker খুলবে — Screen, Window বা Tab বেছে নিন।<br>
+      Tab audio চাইলে picker-এ <b>“Also share tab audio”</b> টিক দিন।</p>
+      <button id="beginBtn" class="primary big">● Start Recording</button>
+      <p class="muted small">Settings বদলাতে extension icon-এ ক্লিক করুন।</p>
+
+      <details id="phoneMicPanel" class="phone-panel">
+        <summary>📱 Phone কে mic হিসেবে ব্যবহার করুন</summary>
+        <div class="phone-body">
+          <p class="muted small left">এক দিকে <b>QR স্ক্যান</b> করুন বা ফোনে <b>কোডটা টাইপ</b> করুন — copy-paste লাগবে না।</p>
+
+          <button id="phoneStartBtn" class="ctrl">🔗 কানেকশন শুরু করুন</button>
+
+          <div id="phoneConnectWrap" class="hidden">
+            <div class="phone-qr-row">
+              <div id="phoneQR" class="phone-qr"></div>
+              <div class="phone-code-block">
+                <span class="phone-label">ফোনে টাইপ করার কোড</span>
+                <div id="phoneCode" class="phone-code">------</div>
+                <span class="muted small">ফোনে খুলুন: <b id="phoneUrlText"></b></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone-status-row">
+            <span id="phoneStatus" class="phone-status">অসংযুক্ত</span>
+            <div class="phone-meter"><div id="phoneLevel"></div></div>
+            <button id="phoneDisconnectBtn" class="ctrl danger hidden">✕ বিচ্ছিন্ন</button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- countdown -->
+    <section id="countdownView" class="hidden">
+      <div id="countNum">3</div>
+    </section>
+
+    <!-- live recording -->
+    <section id="liveView" class="card hidden">
+      <div class="live-top">
+        <div id="liveTimer">00:00</div>
+        <div class="live-meta">
+          <span id="liveRes"></span>
+          <span id="liveSize">0 MB</span>
+        </div>
+      </div>
+      <video id="livePreview" muted playsinline></video>
+      <div class="btnrow">
+        <button id="pauseBtn" class="ctrl">⏸ Pause</button>
+        <button id="micBtn" class="ctrl">🎙 Mute mic</button>
+        <button id="stopBtn" class="ctrl stop">⏹ Stop &amp; Save</button>
+        <button id="discardBtn" class="ctrl danger">✕ Discard</button>
+      </div>
+      <p class="muted small center">এই tab টি বন্ধ করবেন না। অন্য tab/app এ কাজ করতে পারেন — recording চলতে থাকবে। ⌥⇧R stop · ⌥⇧P pause · ⌥⇧M mic</p>
+    </section>
+
+    <!-- preview / save -->
+    <section id="previewView" class="card hidden">
+      <h1>Recording সম্পন্ন ✔</h1>
+      <video id="playback" controls playsinline></video>
+      <div class="meta-grid">
+        <div><span class="muted">Duration</span><b id="metaDuration">—</b></div>
+        <div><span class="muted">Size</span><b id="metaSize">—</b></div>
+        <div><span class="muted">Format</span><b id="metaFormat">—</b></div>
+        <div><span class="muted">Resolution</span><b id="metaRes">—</b></div>
+      </div>
+      <div class="row">
+        <input type="text" id="fileName" spellcheck="false">
+      </div>
+      <div class="btnrow">
+        <button id="saveBtn" class="primary">⬇ Save</button>
+        <button id="againBtn" class="ctrl">● Record again</button>
+        <button id="deleteBtn" class="ctrl danger">🗑 Delete</button>
+      </div>
+      <p id="savedNote" class="muted small center hidden">Saved to Downloads ✔</p>
+    </section>
+
+    <!-- error -->
+    <section id="errorView" class="card hidden">
+      <h1>⚠ সমস্যা হয়েছে</h1>
+      <p id="errorMsg" class="muted"></p>
+      <ul class="muted small">
+        <li>macOS: System Settings → Privacy &amp; Security → <b>Screen Recording</b> → Chrome কে allow করুন, তারপর Chrome restart করুন।</li>
+        <li>Mic সমস্যা হলে: Privacy &amp; Security → <b>Microphone</b> → Chrome allow করুন।</li>
+      </ul>
+      <button id="retryBtn" class="primary">Try again</button>
+    </section>
+  </div>
+
+  <script src="peerjs.min.js"></script>
+  <script src="qrcode.min.js"></script>
+  <script src="recorder.js"></script>
+</body>
+</html>
