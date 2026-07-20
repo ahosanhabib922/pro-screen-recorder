@@ -171,6 +171,33 @@
       tick();
     }
 
+    function micErrMsg(e) {
+      const n = e && e.name;
+      if (n === 'NotAllowedError' || n === 'SecurityError')
+        return 'মাইকের অনুমতি দেওয়া হয়নি — ব্রাউজারের 🔒/সেটিংসে Microphone "Allow" করে পেজ refresh করুন';
+      if (n === 'NotReadableError' || n === 'TrackStartError')
+        return 'মাইক অন্য অ্যাপে চালু আছে — সেটা (কল/রেকর্ডার) বন্ধ করে আবার চেষ্টা করুন';
+      if (n === 'NotFoundError')
+        return 'এই ফোনে কোনো মাইক পাওয়া যায়নি';
+      return 'মাইক চালু করা গেল না (' + (n || (e && e.message)) + ') — HTTPS দিয়ে খুলেছেন তো?';
+    }
+
+    async function getMic() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+        throw Object.assign(new Error('no getUserMedia'), { name: 'NotFoundError' });
+      // Full processing first; if a device rejects the constraints, fall back to plain audio.
+      const attempts = [
+        { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } },
+        { audio: true }
+      ];
+      let lastErr;
+      for (const c of attempts) {
+        try { return await navigator.mediaDevices.getUserMedia(c); }
+        catch (e) { lastErr = e; if (e && (e.name === 'NotAllowedError' || e.name === 'NotReadableError')) break; }
+      }
+      throw lastErr;
+    }
+
     /* ---------- connect mic to the recorder over the PeerJS relay ---------- */
     async function connect() {
       const code = $('code').value.trim().toUpperCase();
@@ -179,9 +206,8 @@
       try {
         if (!localStream) {
           setStatus('মাইকের অনুমতি চাওয়া হচ্ছে…');
-          localStream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
-          });
+          try { localStream = await getMic(); }
+          catch (e) { setStatus(micErrMsg(e), 'err'); $('go').disabled = false; return; }
           startMeter(localStream);
         }
         setStatus('recorder-এর সাথে কানেক্ট হচ্ছে…');
@@ -202,7 +228,7 @@
           $('go').disabled = false;
         });
       } catch (e) {
-        setStatus('মাইক পাওয়া যায়নি: ' + e.message + ' (পেজটা HTTPS দিয়ে খুলুন)', 'err');
+        setStatus('কানেক্ট করা গেল না: ' + (e && e.message), 'err');
         $('go').disabled = false;
       }
     }
